@@ -328,7 +328,7 @@ Status DataStreamRecvr::create_merger(const TupleRowComparator& less_than) {
 
     for (int i = 0; i < _sender_queues.size(); ++i) {
         child_input_batch_suppliers.emplace_back(
-                bind(mem_fn(&SenderQueue::get_batch), _sender_queues[i], _1));
+                bind(mem_fn(&SenderQueue::get_batch), _sender_queues[i], boost::placeholders::_1));
     }
     RETURN_IF_ERROR(_merger->prepare(child_input_batch_suppliers));
     return Status::OK();

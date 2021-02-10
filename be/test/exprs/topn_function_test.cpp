@@ -87,7 +87,7 @@ void test_topn_accuracy(FunctionContext* ctx, int key_space, int space_expand_ra
         random_strs[i] = gen_random(10);
     }
 
-    zipf_distribution<uint64_t, double> zf(key_space, zipf_distribution_exponent);
+    zipf_distribution<uint64_t, double> zf(key_space - 1, zipf_distribution_exponent);
     std::random_device rd;
     std::mt19937 gen(rd());
 
