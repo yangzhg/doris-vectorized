@@ -577,6 +577,7 @@ CONF_mInt32(runtime_filter_max_in_num, "1024");
 // disable zone map index when page row is too few
 CONF_mInt32(zone_map_row_num_threshold, "20");
 
+CONF_mBool(is_vec, "true");
 } // namespace config
 
 } // namespace doris
