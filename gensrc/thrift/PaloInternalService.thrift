@@ -139,9 +139,11 @@ struct TQueryOptions {
   // whether enable spilling to disk
   31: optional bool enable_spilling = false;
   // whether enable runtime filter
-  32: optional bool enable_runtime_filter_mode = true;
+  32: optional bool enable_runtime_filter_mode = true
   // whether enable parallel merge in exchange node
-  33: optional bool enable_enable_exchange_node_parallel_merge = false;
+  33: optional bool enable_enable_exchange_node_parallel_merge = false
+  // whether enable vectorized engine 
+  34: optional bool enable_vectorized_engine = false
 }
     
 
@@ -278,7 +280,7 @@ struct TExecPlanFragmentParams {
   14: optional TLoadErrorHubInfo load_error_hub_info
 
   // The total number of fragments on same BE host
-  15: optional i32 fragment_num_on_host;
+  15: optional i32 fragment_num_on_host
 
   // If true, all @Common components is unset and should be got from BE's cache
   // If this field is unset or it set to false, all @Common components is set.

@@ -61,6 +61,9 @@
 #include "runtime/runtime_state.h"
 #include "util/debug_util.h"
 #include "util/runtime_profile.h"
+#include "vec/core/block.h"
+#include "vec/exec/aggregation_node.h"
+#include "vec/exec/olap_scan_node.h"
 
 namespace doris {
 
@@ -150,7 +153,8 @@ void ExecNode::push_down_predicate(RuntimeState* state, std::list<ExprContext*>*
             //          << " and node is " << debug_string();
             if ((*iter)->root()->node_type() == TExprNodeType::BLOOM_PRED &&
                 (this->type() != TPlanNodeType::EXCHANGE_NODE &&
-                 this->type() != TPlanNodeType::OLAP_SCAN_NODE)) {
+                 this->type() != TPlanNodeType::OLAP_SCAN_NODE &&
+                 this->type() != TPlanNodeType::VOLAP_SCAN_NODE)) {
                 // ignore
             } else {
                 (*iter)->prepare(state, row_desc(), _expr_mem_tracker);
@@ -370,12 +374,19 @@ Status ExecNode::create_node(RuntimeState* state, ObjectPool* pool, const TPlanN
         *node = pool->add(new OlapScanNode(pool, tnode, descs));
         return Status::OK();
 
+    case TPlanNodeType::VOLAP_SCAN_NODE:
+        *node = pool->add(new vectorized::VOlapScanNode(pool, tnode, descs));
+        return Status::OK();
+
     case TPlanNodeType::AGGREGATION_NODE:
         if (config::enable_partitioned_aggregation) {
             *node = pool->add(new PartitionedAggregationNode(pool, tnode, descs));
         } else {
             *node = pool->add(new AggregationNode(pool, tnode, descs));
         }
+        return Status::OK();
+    case TPlanNodeType::VAGGREGATION_NODE:
+        *node = pool->add(new doris::vectorized::AggregationNode(pool, tnode, descs));
         return Status::OK();
     case TPlanNodeType::HASH_JOIN_NODE:
         *node = pool->add(new HashJoinNode(pool, tnode, descs));
@@ -518,6 +529,7 @@ void ExecNode::collect_nodes(TPlanNodeType::type node_type, std::vector<ExecNode
 
 void ExecNode::collect_scan_nodes(vector<ExecNode*>* nodes) {
     collect_nodes(TPlanNodeType::OLAP_SCAN_NODE, nodes);
+    collect_nodes(TPlanNodeType::VOLAP_SCAN_NODE, nodes);
     collect_nodes(TPlanNodeType::BROKER_SCAN_NODE, nodes);
     collect_nodes(TPlanNodeType::ES_SCAN_NODE, nodes);
     collect_nodes(TPlanNodeType::ES_HTTP_SCAN_NODE, nodes);
@@ -534,7 +546,8 @@ void ExecNode::try_do_aggregate_serde_improve() {
         return;
     }
 
-    if (agg_node[0]->_children[0]->type() != TPlanNodeType::OLAP_SCAN_NODE) {
+    if (agg_node[0]->_children[0]->type() != TPlanNodeType::OLAP_SCAN_NODE &&
+        agg_node[0]->_children[0]->type() != TPlanNodeType::VOLAP_SCAN_NODE) {
         return;
     }
 
@@ -627,6 +640,10 @@ Status ExecNode::QueryMaintenance(RuntimeState* state, const std::string& msg) {
     // TODO chenhao , when introduce latest AnalyticEvalNode open it
     // ScalarExprEvaluator::FreeLocalAllocations(evals_to_free_);
     return state->check_query_state(msg);
+}
+
+Status ExecNode::get_next(RuntimeState* state, vectorized::Block* block, bool* eos) {
+    return Status::NotSupported("Not Implemented get block");
 }
 
 } // namespace doris
