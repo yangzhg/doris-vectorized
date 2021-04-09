@@ -345,6 +345,8 @@ public:
         return _query_options.enable_enable_exchange_node_parallel_merge;
     }
 
+    bool enable_vectorized_exec() const { return _query_options.enable_vectorized_engine; }
+
     // the following getters are only valid after Prepare()
     InitialReservations* initial_reservations() const { return _initial_reservations; }
 
