@@ -342,6 +342,8 @@ public:
 
     bool enable_spill() const { return _query_options.enable_spilling; }
 
+    bool enable_vectorized_exec() const { return _query_options.enable_vectorized_engine; }
+
     bool enable_runtime_filter_mode() { return _query_options.enable_runtime_filter_mode; }
 
     bool enable_exchange_node_parallel_merge() const { return _query_options.enable_enable_exchange_node_parallel_merge; }
