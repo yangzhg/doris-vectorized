@@ -23,6 +23,7 @@ import org.apache.doris.ha.BDBHA;
 import org.apache.doris.ha.BDBStateChangeListener;
 import org.apache.doris.ha.HAProtocol;
 
+import org.apache.commons.lang.StringUtils;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseException;
@@ -340,10 +341,9 @@ public class BDBEnvironment {
         
         if (names != null) {
             for (String name : names) {
+                // We don't count epochDB
                 if (StringUtils.isNumeric(name)) {
                     ret.add(Long.parseLong(name));
-                } else {
-                    LOG.debug("get database names, skipped {}", name);
                 }
             }
         }
